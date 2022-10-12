@@ -10,20 +10,11 @@ void how_to_usage() {
 	printf("sample: pcap-test wlan0 192.168.0.1 192.168.0.2\n");
 }
 
-typedef struct {
-	char* dev_;
-} Param;
-
-Param param  = {
-	.dev_ = NULL
-};
-
-bool parse(Param* param, int argc, char* argv[]) {
-	if (argc <= 3) {
+bool parse(int argc, char* argv[]) {
+	if (argc <= 3 || (argc %2)) {
 		how_to_usage();
 		return false;
 	}
-	param->dev_ = argv[1];
 	return true;
 }
 
@@ -31,15 +22,24 @@ int main(int argc, char* argv[]) {
 	
 	uint32_t num_seq;
 	pid_t pid;
-	ip_mac mine;
-	if (!parse(&param, argc, argv)) // 인자 제대로 줬는지 확인
-                return -1;
-	if(!My_Mac_Address(mine.my_mac, argv[1]))// interface에 해당하는 mac address 확인
+	IpMac Mine;
+	char* TempCharString;
+	std::string TempString;
+	if (!parse(argc, argv)) // 인자 제대로 줬는지 확인
+		return -1;
+
+	TempCharString = MyMacAddress(argv[1]);
+	if (!TempCharString)// interface에 해당하는 mac address 확인
 	{
 		fprintf(stderr,"Interface does not match the format\n");
 		return -1;
 	}
-	My_Ip_Address(mine.my_ip,argv[1]);// ip 확인
+	TempString = TempCharString;
+	Mine.MyMac = Mac(TempString);
+
+	TempCharString = MyIpAddress(argv[1]);// ip 확인
+	TempString = TempCharString;
+	Mine.MyIp = htonl(Ip(TempString));
 
 	for(num_seq=1;num_seq*2<argc;num_seq++)
 	{
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 		printf("arp spoofing 종료\n");
 		return 0;
 	}
-	my_arp_spoof(argv[1],argv[2*num_seq],argv[2*num_seq+1],&mine);
+	MyArpSpoof(argv[1],argv[2*num_seq],argv[2*num_seq+1],Mine);
 	
 	return 0;
 }

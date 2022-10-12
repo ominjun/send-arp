@@ -1,3 +1,5 @@
+#pragma once
+
 #include <arpa/inet.h>
 #include <cstdio>
 #include <stdint.h>
@@ -10,18 +12,19 @@
 #include <netinet/in.h>
 #include <pcap.h>
 #include <unistd.h>
-#pragma once
+#include "arphdr.h"
+#include "ethhdr.h"
 
 typedef struct {
-	char my_ip[16];
-	char my_mac[18];
-}ip_mac;
+	Ip MyIp;
+	Mac MyMac;
+}IpMac;
 
-bool My_Mac_Address(char* Mac_store, char* interface);
-void My_Ip_Address(char* Ip_store, char* interface);
-bool get_sender_mac(const u_char* packet, char* sender_ip, char* sender_mac);
-bool check_ip(char* test_ip);
-bool Send_ARP_Request(pcap_t *pcap, ip_mac* mine, char* sender_ip);
-bool Receive_ARP_Reply(pcap_t* pcap, char* sender_ip, char* sender_mac);
-void Attack_ARP(pcap_t* pcap, char* sender_ip, char* target_ip, char* sender_mac, ip_mac* mine);
-void my_arp_spoof(char* my_interface, char* sender_ip, char* target_ip, ip_mac* mine);
+char * MyMacAddress(char* InInterface);
+char * MyIpAddress(char* InInterface);
+bool CheckIp(char* InTestIp);
+bool SendArpRequest(pcap_t* pcap, IpMac InSender, IpMac InAttacker);
+//bool get_sender_mac(const u_char* packet, char* sender_ip, char* sender_mac);
+void ReceiveArpReply(pcap_t* pcap, IpMac* InSender);
+void AttackArp(pcap_t* pcap, IpMac InSender, Ip InTarget,IpMac InAttacker);
+void MyArpSpoof(char* InInterface, char* InSenderIp, char* InTargetIp, IpMac InAttacker);

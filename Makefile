@@ -6,7 +6,7 @@ my-arp-spoof: myarpspoof.o main.o arphdr.o ethhdr.o ip.o mac.o
 
 main.o: myarpspoof.h main.cpp
 
-myarpspoof.o: myarpspoof.h myarpspoof.cpp mac.h ip.h arphdr.h ethhdr.h
+myarpspoof.o: myarpspoof.h myarpspoof.cpp arphdr.h ethhdr.h
 
 arphdr.o: mac.h ip.h arphdr.h arphdr.cpp
 
