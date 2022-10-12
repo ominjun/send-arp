@@ -108,10 +108,13 @@ bool SendArpRequest(pcap_t* pcap, IpMac InSender, IpMac InAttacker)
 bool GetSenderMac(const u_char * packet, IpMac* InSender)
 {
 	EthArpPacket* header = (EthArpPacket*)packet;
-	if (header->eth_.type_ != 0x0806) //Arp packet 확인
+	
+	if (ntohs(header->eth_.type_) != 0x0806) //Arp packet 확인
 		return 0;
+
 	if (!(InSender->MyIp == header->arp_.sip_))
 		return 0;
+
 	InSender->MyMac = header->arp_.smac_;
 	return 1;
 }
@@ -129,7 +132,9 @@ void ReceiveArpReply(pcap_t* pcap, IpMac* InSender)
 			return ;
 		}
 	} while(!GetSenderMac(packet, InSender));
-	pcap_close(pcap);
+
+	std::cout << InSender->MyMac.operator std::string() << std::endl;
+
 	return ;
 }
 void AttackArp(pcap_t* pcap, IpMac InSender, Ip InTarget, IpMac InAttacker) 
@@ -178,6 +183,8 @@ void MyArpSpoof(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac 
 
 	TempString = InSenderIp;
 	Sender.MyIp = htonl(Ip(TempString));
+
+	
 	TempString = InTargetIp;
 	TargetIp = htonl(Ip(TempString));
 	
@@ -188,7 +195,7 @@ void MyArpSpoof(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac 
 		{
 			for (j = 0; j < 5; j++)
 			{
-				SendArpRequest(pcap, InAttacker, Sender); //sender MAC 주소 요청
+				SendArpRequest(pcap, Sender, InAttacker); //sender MAC 주소 요청
 				sleep(1);
 			}
 			return;
