@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 	GetMyMac(&(Mine.MyMac), TempCharString);
-	
+
 	TempCharString = MyIpAddress(argv[1]);// ip 확인
 	GetMyIp(&(Mine.MyIp), TempCharString);
 	

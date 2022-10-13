@@ -15,6 +15,7 @@
 #include "ethhdr.h"
 #include "mysendarp.h"
 #include <sys/wait.h>
+#include <iostream>
 
 #pragma pack(push, 1)
 struct EthArpPacket final {
@@ -122,11 +123,13 @@ bool GetSenderMac(const u_char * packet, IpMac* InSender)
 	if (ntohs(header->eth_.type_) != 0x0806) //ARP packet 확인
 		return 0;
 
-	if (!(InSender->MyIp == header->arp_.sip_))
-		return 0;
-
-	InSender->MyMac = header->arp_.smac_;
-	return 1;
+	if (InSender->MyIp == header->arp_.sip_)
+	{
+		InSender->MyMac = header->arp_.smac_;
+		return 1;
+	}
+	
+	return 0;
 }
 void ReceiveArpReply(pcap_t* pcap, IpMac* InSender) 
 {
@@ -199,7 +202,7 @@ void MySendArp(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac I
 			for (j = 0; j < 5; j++)
 			{
 				SendArpRequest(pcap, Sender, InAttacker); //sender MAC 주소 요청
-				sleep(1);
+				sleep(0.5);
 			}
 			return;
 		}
@@ -216,9 +219,9 @@ void MySendArp(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac I
 		printf("ARP Reply has an error\n");
 		return;
 	}
-
+			
 	AttackArp(pcap, Sender, TargetIp, InAttacker);	// 공격
-
+	
 	printf("from %s to %s arp spoof successes\n", InSenderIp, InTargetIp);
 	
 	pcap_close(pcap);
