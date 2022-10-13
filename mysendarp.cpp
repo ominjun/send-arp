@@ -15,7 +15,6 @@
 #include "ethhdr.h"
 #include "mysendarp.h"
 #include <sys/wait.h>
-#include <iostream>
 
 #pragma pack(push, 1)
 struct EthArpPacket final {
@@ -26,15 +25,13 @@ struct EthArpPacket final {
 
 void GetMyMac(Mac* InMac, char* InAddress)
 {
-	std::string TempString;
-	TempString = InAddress;
+	std::string TempString = InAddress;
 	*InMac = Mac(TempString);
 	return;
 }
 void GetMyIp(Ip* InIp, char* InAddress)
 {
-	std::string TempString;
-	TempString = InAddress;
+	std::string TempString = InAddress;
 	*InIp = htonl(Ip(TempString));
 	return;
 }
@@ -70,8 +67,7 @@ char* MyIpAddress(char* InInterface)
 	int fd;
 	struct ifreq ifr;
 	static char IpStore[16];
-	std::string str;
-
+	
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 	ifr.ifr_addr.sa_family = AF_INET;
 	strncpy(ifr.ifr_name, InInterface, IFNAMSIZ - 1);
@@ -123,7 +119,7 @@ bool GetSenderMac(const u_char * packet, IpMac* InSender)
 {
 	EthArpPacket* header = (EthArpPacket*)packet;
 	
-	if (ntohs(header->eth_.type_) != 0x0806) //Arp packet 확인
+	if (ntohs(header->eth_.type_) != 0x0806) //ARP packet 확인
 		return 0;
 
 	if (!(InSender->MyIp == header->arp_.sip_))
@@ -146,8 +142,6 @@ void ReceiveArpReply(pcap_t* pcap, IpMac* InSender)
 			return ;
 		}
 	} while(!GetSenderMac(packet, InSender));
-
-	std::cout << InSender->MyMac.operator std::string() << std::endl;
 
 	return ;
 }
@@ -200,7 +194,7 @@ void MySendArp(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac I
 	for (i = 0; i < 1; i++)
 	{
 		pid = fork();
-		if (pid == 0) //각 프로세스는 고유의 num_seq를 가지고 argv의 num_seq*2와 num_seq*2+1만 신경쓰면 됨
+		if (pid == 0) //ARP Request 보내기
 		{
 			for (j = 0; j < 5; j++)
 			{
