@@ -221,12 +221,11 @@ void MySendArp(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac I
 	}
 			
 	AttackArp(pcap, Sender, TargetIp, InAttacker);	// 공격
-	
 	printf("from %s to %s arp spoof successes\n", InSenderIp, InTargetIp);
-	
-	pcap_close(pcap);
-	
+		
 	while (wait(NULL) > 0);
+
+	pcap_close(pcap);
 
 	return;
 }
