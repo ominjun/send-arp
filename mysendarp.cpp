@@ -204,6 +204,7 @@ void MySendArp(char * InInterface, char * InSenderIp, char * InTargetIp, IpMac I
 				SendArpRequest(pcap, Sender, InAttacker); //sender MAC 주소 요청
 				sleep(0.5);
 			}
+			pcap_close(pcap);
 			return;
 		}
 		if (pid == -1) //fork 실패 시 다시 시도
